@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="tag">校园匿名社区</span>
+    <h1>把想说的话，写在这里。</h1>
+    <p>分享祝福、友情、感谢和心里话。所有投稿经审核后公开。</p>
+  </div>
+</section>
+
+<section class="card form-card">
+  <h2>发布一条表白 💌</h2>
+  <form method="post" action="{{ url_for('create_post') }}">
+    <div class="grid2">
+      <label>昵称
+        <input name="nickname" maxlength="30" placeholder="例如：小明" required>
+      </label>
+      <label>年级/班级（可选）
+        <input name="grade" maxlength="30" placeholder="例如：高一3班">
+      </label>
+    </div>
+    <label>内容
+      <textarea name="content" maxlength="1000" rows="5" placeholder="写下你想说的话……" required></textarea>
+    </label>
+    <label class="check"><input type="checkbox" name="anonymous" checked> 以匿名方式显示昵称</label>
+    <button class="primary" type="submit">提交审核</button>
+  </form>
+</section>
+
+<div class="section-title">
+  <h2>最新表白</h2>
+  <span>{{ posts|length }} 条</span>
+</div>
+
+{% for post in posts %}
+<article class="card post">
+  <div class="post-head">
+    <div>
+      <strong>{{ "匿名同学" if post["anonymous"] else post["nickname"] }}</strong>
+      {% if post["grade"] %}<span class="grade">{{ post["grade"] }}</span>{% endif %}
+    </div>
+    <small>{{ post["created_at"] }}</small>
+  </div>
+  <p class="content">{{ post["content"] }}</p>
+  <div class="actions">
+    <button class="like" data-id="{{ post['id'] }}">❤️ <span>{{ post["likes"] }}</span></button>
+    <form method="post" action="{{ url_for('report', post_id=post['id']) }}" class="report">
+      <input name="reason" placeholder="举报原因（可选）">
+      <button type="submit">举报</button>
+    </form>
+  </div>
+  <details>
+    <summary>评论</summary>
+    <form method="post" action="{{ url_for('comment', post_id=post['id']) }}" class="comment-form">
+      <input name="nickname" maxlength="30" placeholder="昵称" required>
+      <input name="content" maxlength="300" placeholder="写评论……" required>
+      <button type="submit">发送</button>
+    </form>
+  </details>
+</article>
+{% else %}
+<div class="card empty">还没有公开投稿，来发布第一条吧。</div>
+{% endfor %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}管理后台{% endblock %}
+{% block content %}
+<div class="admin-head">
+  <div>
+    <span class="tag">ADMIN</span>
+    <h1>表白墙管理后台</h1>
+  </div>
+  <a class="btn" href="{{ url_for('admin_logout') }}">退出登录</a>
+</div>
+
+<div class="stats">
+{% for label, value in [
+("总投稿",stats.total),("待审核",stats.pending),("已通过",stats.approved),
+("已拒绝",stats.rejected),("总点赞",stats.likes),("举报",stats.reports)] %}
+<div class="stat card"><span>{{ label }}</span><b>{{ value }}</b></div>
+{% endfor %}
+</div>
+
+<h2>待审核</h2>
+{% for p in pending %}
+<div class="card admin-post">
+  <div><b>#{{ p.id }} {{ p.nickname }}</b> · {{ p.grade or "未填写班级" }}</div>
+  <p>{{ p.content }}</p>
+  <small>{{ p.created_at }}</small>
+  <div class="admin-actions">
+    <form method="post" action="{{ url_for('admin_post_action',post_id=p.id,action='approve') }}"><button class="primary">通过</button></form>
+    <form method="post" action="{{ url_for('admin_post_action',post_id=p.id,action='reject') }}"><button>拒绝</button></form>
+    <form method="post" action="{{ url_for('admin_post_action',post_id=p.id,action='delete') }}" onsubmit="return confirm('确定删除？')"><button class="danger">删除</button></form>
+  </div>
+</div>
+{% else %}<div class="card empty">暂无待审核投稿。</div>{% endfor %}
+
+<h2>已通过</h2>
+{% for p in approved[:30] %}
+<div class="card admin-post compact">
+  <div><b>#{{ p.id }}</b> {{ p.nickname }} · 👍 {{ p.likes }}</div>
+  <p>{{ p.content }}</p>
+  <form method="post" action="{{ url_for('admin_post_action',post_id=p.id,action='delete') }}" onsubmit="return confirm('确定删除？')"><button class="danger">删除</button></form>
+</div>
+{% endfor %}
+{% endblock %}
